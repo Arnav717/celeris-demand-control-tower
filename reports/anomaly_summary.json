@@ -1,0 +1,84 @@
+{
+  "register_rows": 23311,
+  "by_category": {
+    "stockout": 8803,
+    "error": 8023,
+    "real_event": 3492,
+    "suspected": 1684,
+    "data_gap": 1309
+  },
+  "by_type": {
+    "stockout_requested": 5830,
+    "error_units_from_revenue": 3163,
+    "stockout_inferred": 1925,
+    "unexplained_dip": 1537,
+    "covid_disruption": 1493,
+    "missing_data": 1309,
+    "backorder_removed": 1048,
+    "one_off_order": 964,
+    "error_region_inferred": 737,
+    "error_price_currency_eur": 710,
+    "error_price_x100": 613,
+    "error_units_sign": 491,
+    "error_revenue_rescaled": 427,
+    "level_shift_up": 394,
+    "error_price_x10": 385,
+    "error_units_uom_x10": 385,
+    "error_units_missing": 380,
+    "error_units_rescaled": 367,
+    "error_price_missing": 295,
+    "holiday_dip": 224,
+    "timing_shift_or_unlisted_stockout": 147,
+    "ordering_cycle_change": 124,
+    "level_shift_down": 79,
+    "customer_event_dip": 75,
+    "pre_price_rise_buying": 43,
+    "error_units_from_stockout": 39,
+    "error_date_repaired": 30,
+    "logistics_delay": 27,
+    "customer_switch": 23,
+    "structural_break": 22,
+    "lost_account": 16,
+    "customer_event_uplift": 8,
+    "error_price_mismatch": 1
+  },
+  "demand_vs_shipments_uplift_pct": 1.37,
+  "lost_units_est": 119306.0,
+  "price_rise_buying": [
+    {
+      "year": 2019,
+      "novdec_vs_sepoct": 0.887,
+      "next_janfeb_vs_sepoct": 0.828
+    },
+    {
+      "year": 2020,
+      "novdec_vs_sepoct": 1.072,
+      "next_janfeb_vs_sepoct": 1.133
+    },
+    {
+      "year": 2021,
+      "novdec_vs_sepoct": 0.848,
+      "next_janfeb_vs_sepoct": 0.85
+    },
+    {
+      "year": 2022,
+      "novdec_vs_sepoct": 1.01,
+      "next_janfeb_vs_sepoct": 0.829
+    },
+    {
+      "year": 2023,
+      "novdec_vs_sepoct": 0.918,
+      "next_janfeb_vs_sepoct": 0.909
+    },
+    {
+      "year": 2024,
+      "novdec_vs_sepoct": 0.91,
+      "next_janfeb_vs_sepoct": 0.892
+    },
+    {
+      "year": 2025,
+      "novdec_vs_sepoct": 0.907,
+      "next_janfeb_vs_sepoct": 0.883
+    }
+  ]
+}

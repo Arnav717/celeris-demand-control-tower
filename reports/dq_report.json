@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-21T10:42:14+00:00",
+  "generated_at": "2026-11-21T10:46:57+00:00",
   "row_counts": {
     "sku_master.csv": {
       "raw_rows": 601,
@@ -27,7 +27,7 @@
       "clean_rows": 68
     }
   },
-  "n_issue_types": 39,
+  "n_issue_types": 40,
   "issues": [
     {
       "file": "sku_master.csv",
@@ -648,6 +648,15 @@
           "Description": "Helios Auto Parts commissions second Indian assembly line (permanent capacity increase)"
         }
       ]
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "erp_migration_blank_values",
+      "rows_affected": 379,
+      "action": "kept as NaN; demand imputed from series level (EV-033: transactions not migrated)",
+      "category": "error",
+      "detail": "LatAm 2023-03..05 rows present but Units_Sold and Revenue_USD blank",
+      "examples": []
     },
     {
       "file": "train.csv",

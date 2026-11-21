@@ -52,7 +52,13 @@ def build_panel(train: pd.DataFrame, master: pd.DataFrame, events_monthly: pd.Da
     p.loc[is_erp, "missing_reason"] = "erp_migration_gap"
     p.loc[(p["row_status"] == "missing_row") & ~is_erp, "missing_reason"] = "unexplained_gap"
     p.loc[after_last, "missing_reason"] = "no_orders_after_last_row"
-    p.loc[p["row_status"] == "missing_value", "missing_reason"] = "units_unrecoverable"
+    mv = p["row_status"] == "missing_value"
+    in_erp = pd.Series(list(zip(p["Date"], p["Region"]))).isin(erp_keys).values
+    p.loc[mv, "missing_reason"] = "units_unrecoverable"
+    p.loc[mv & in_erp, "missing_reason"] = "erp_migration_gap"
+    log.add(F, "erp_migration_blank_values", mv & in_erp,
+            "kept as NaN; demand imputed from series level (EV-033: transactions not migrated)",
+            detail="LatAm 2023-03..05 rows present but Units_Sold and Revenue_USD blank")
 
     log.add(F, "missing_row_internal", (p["row_status"] == "missing_row"),
             "kept as NaN (not zero, rule 3); imputed for demand history",
