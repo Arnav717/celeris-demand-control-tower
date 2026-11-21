@@ -1,0 +1,671 @@
+{
+  "generated_at": "2026-11-21T10:42:14+00:00",
+  "row_counts": {
+    "sku_master.csv": {
+      "raw_rows": 601,
+      "clean_rows": 601
+    },
+    "test.csv": {
+      "raw_rows": 58219,
+      "clean_rows": 58219
+    },
+    "train.csv": {
+      "raw_rows": 248248,
+      "after_dedupe": 244566,
+      "clean_rows": 244550
+    },
+    "inventory_stockouts.csv": {
+      "raw_rows": 5830,
+      "clean_rows": 5830
+    },
+    "macro_indicators.csv": {
+      "raw_rows": 114,
+      "clean_rows": 113
+    },
+    "events_calendar.csv": {
+      "raw_rows": 68,
+      "clean_rows": 68
+    }
+  },
+  "n_issue_types": 39,
+  "issues": [
+    {
+      "file": "sku_master.csv",
+      "issue_type": "business_unit_contradicts_family",
+      "rows_affected": 1,
+      "action": "set to the family's BU (transactions and test.csv agree)",
+      "category": "error",
+      "detail": "",
+      "examples": [
+        {
+          "SKU_ID": "PMP-004",
+          "Product_Family": "Precision Machined Parts",
+          "Business_Unit": "Power & Drive Systems"
+        }
+      ]
+    },
+    {
+      "file": "test.csv",
+      "issue_type": "row_after_eol",
+      "rows_affected": 156,
+      "action": "forecast forced to 0 (rule 5)",
+      "category": "info",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "duplicate_record_exact",
+      "rows_affected": 2950,
+      "action": "dropped earlier copy (identical reload)",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "duplicate_record_revised",
+      "rows_affected": 732,
+      "action": "kept row with latest Load_Timestamp (business rule 2)",
+      "category": "error",
+      "detail": "same Record_ID re-loaded later with different Units_Sold/Revenue_USD",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "date_nonstandard_format",
+      "rows_affected": 9821,
+      "action": "parsed to YYYY-MM",
+      "category": "error",
+      "detail": "formats seen: MM/YYYY, YYYY/MM, Mon-YYYY, Mon YYYY, MM-YYYY, YYYY-MM-DD",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "date_out_of_range",
+      "rows_affected": 30,
+      "action": "replaced by Load_Timestamp month - 1",
+      "category": "error",
+      "detail": "e.g. 2062-01 loaded 2026-02 (digit transposition of 2026)",
+      "examples": [
+        {
+          "Record_ID": "CEL-0002205",
+          "Date": "2062-09",
+          "Year": "2026",
+          "Month": "9",
+          "Load_Timestamp": "2026-10-03 03:58:40"
+        },
+        {
+          "Record_ID": "CEL-0025142",
+          "Date": "2062-08",
+          "Year": "2026",
+          "Month": "8",
+          "Load_Timestamp": "2026-09-03 04:17:31"
+        },
+        {
+          "Record_ID": "CEL-0026984",
+          "Date": "2062-09",
+          "Year": "2026",
+          "Month": "9",
+          "Load_Timestamp": "2026-10-01 05:17:37"
+        },
+        {
+          "Record_ID": "CEL-0030360",
+          "Date": "2062-08",
+          "Year": "2026",
+          "Month": "8",
+          "Load_Timestamp": "2026-09-03 01:58:51"
+        },
+        {
+          "Record_ID": "CEL-0036690",
+          "Date": "2062-02",
+          "Year": "2026",
+          "Month": "2",
+          "Load_Timestamp": "2026-03-01 02:37:47"
+        }
+      ]
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "year_month_disagree_with_date",
+      "rows_affected": 246,
+      "action": "Year/Month rebuilt from Date (rule 1)",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "sku_id_malformed",
+      "rows_affected": 3683,
+      "action": "normalised to AAA-NNN",
+      "category": "error",
+      "detail": "lower case, '_' separator, missing dash, missing zero padding, stray spaces",
+      "examples": [
+        {
+          "raw": "BSS_001",
+          "clean": "BSS-001"
+        },
+        {
+          "raw": "bss-001",
+          "clean": "BSS-001"
+        },
+        {
+          "raw": " BSS-001",
+          "clean": "BSS-001"
+        },
+        {
+          "raw": "BSS001",
+          "clean": "BSS-001"
+        },
+        {
+          "raw": " BSS-002",
+          "clean": "BSS-002"
+        }
+      ]
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "region_label_variant",
+      "rows_affected": 6117,
+      "action": "mapped to canonical region",
+      "category": "error",
+      "detail": "",
+      "examples": [
+        {
+          "raw": "Latin-America",
+          "clean": "Latin America"
+        },
+        {
+          "raw": "India ",
+          "clean": "India"
+        },
+        {
+          "raw": "Asia-Pacific",
+          "clean": "Asia Pacific"
+        },
+        {
+          "raw": "LatAm",
+          "clean": "Latin America"
+        },
+        {
+          "raw": "North America ",
+          "clean": "North America"
+        }
+      ]
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "channel_label_variant",
+      "rows_affected": 3683,
+      "action": "mapped to canonical channel",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "customer_name_variant",
+      "rows_affected": 2455,
+      "action": "mapped to canonical customer (case, spacing, Inc. suffix, typos)",
+      "category": "error",
+      "detail": "",
+      "examples": [
+        {
+          "raw": "Solaris Automotive Inc.",
+          "clean": "Solaris Automotive"
+        },
+        {
+          "raw": "Helios Auo Parts",
+          "clean": "Helios Auto Parts"
+        },
+        {
+          "raw": "Crestline Manufacturing Inc.",
+          "clean": "Crestline Manufacturing"
+        },
+        {
+          "raw": "Solaris Autootive",
+          "clean": "Solaris Automotive"
+        },
+        {
+          "raw": "Atlas Mideast Components Inc.",
+          "clean": "Atlas Mideast Components"
+        }
+      ]
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "product_family_missing",
+      "rows_affected": 1228,
+      "action": "filled from sku_master",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "sku_description_missing",
+      "rows_affected": 982,
+      "action": "filled from sku_master",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "region_missing_inferred",
+      "rows_affected": 737,
+      "action": "inferred from SKU+customer+channel series with a free slot that month",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "units_thousands_separator",
+      "rows_affected": 44,
+      "action": "parsed as number",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "units_placeholder_dash",
+      "rows_affected": 217,
+      "action": "treated as missing value",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "price_x100_cents",
+      "rows_affected": 613,
+      "action": "replaced with SKU-year list price",
+      "category": "error",
+      "detail": "price entered in cents (x100); revenue is correct in USD",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "price_x10",
+      "rows_affected": 385,
+      "action": "replaced with SKU-year list price",
+      "category": "error",
+      "detail": "mostly India rows",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "price_in_eur_not_usd",
+      "rows_affected": 710,
+      "action": "replaced with USD list price; revenue rebuilt",
+      "category": "error",
+      "detail": "Europe rows with price and revenue ~0.89x list (EUR booked as USD)",
+      "examples": [
+        {
+          "Date": "2022-01",
+          "SKU_ID": "BSS-001",
+          "Region": "Europe",
+          "Unit_Price_USD": "584.51",
+          "Revenue_USD": "23964.91"
+        },
+        {
+          "Date": "2022-02",
+          "SKU_ID": "BSS-001",
+          "Region": "Europe",
+          "Unit_Price_USD": "584.51",
+          "Revenue_USD": "23964.91"
+        },
+        {
+          "Date": "2022-03",
+          "SKU_ID": "BSS-001",
+          "Region": "Europe",
+          "Unit_Price_USD": "584.51",
+          "Revenue_USD": "40915.7"
+        },
+        {
+          "Date": "2022-01",
+          "SKU_ID": "BSS-004",
+          "Region": "Europe",
+          "Unit_Price_USD": "354.58",
+          "Revenue_USD": "51768.68"
+        },
+        {
+          "Date": "2022-02",
+          "SKU_ID": "BSS-004",
+          "Region": "Europe",
+          "Unit_Price_USD": "354.58",
+          "Revenue_USD": "36167.16"
+        }
+      ]
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "price_zero_with_units",
+      "rows_affected": 295,
+      "action": "replaced with SKU-year list price",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "price_other_mismatch",
+      "rows_affected": 1,
+      "action": "replaced with SKU-year list price",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "price_surcharge_2022H2",
+      "rows_affected": 13879,
+      "action": "kept (real: EV-027 6% surcharge)",
+      "category": "real_event",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "units_negative",
+      "rows_affected": 491,
+      "action": "sign flipped (abs)",
+      "category": "error",
+      "detail": "negative units with negative revenue of matching magnitude; |units| in series' normal range -> sign error, not returns",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "units_missing_rebuilt",
+      "rows_affected": 3164,
+      "action": "units = revenue / price",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "units_missing_unrecoverable",
+      "rows_affected": 380,
+      "action": "left NaN (missing value, not zero); imputed in demand stage",
+      "category": "error",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "units_uom_packs_of_10",
+      "rows_affected": 385,
+      "action": "units = revenue / list price (x10)",
+      "category": "error",
+      "detail": "price x10 and units /10 with correct revenue; mostly India",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "units_scale_error",
+      "rows_affected": 367,
+      "action": "units rescaled to match revenue",
+      "category": "error",
+      "detail": "units off by x10/x100 vs revenue; corrected value closer to series level",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "revenue_scale_error",
+      "rows_affected": 427,
+      "action": "revenue rebuilt = units x price",
+      "category": "error",
+      "detail": "revenue off by x10/x100; units consistent with series level",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "revenue_minor_mismatch",
+      "rows_affected": 203,
+      "action": "revenue rebuilt = units x price",
+      "category": "error",
+      "detail": "units x price != revenue by a non-scale factor; units trusted",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "units_disagree_with_stockout_shipped",
+      "rows_affected": 39,
+      "action": "set to Shipped_Units",
+      "category": "error",
+      "detail": "",
+      "examples": [
+        {
+          "Date": "2021-08",
+          "SKU_ID": "ELA-006",
+          "Region": "India",
+          "Units_Sold": 40.0,
+          "Shipped_Units": 35.0
+        },
+        {
+          "Date": "2021-11",
+          "SKU_ID": "ELA-006",
+          "Region": "India",
+          "Units_Sold": 70.0,
+          "Shipped_Units": 67.0
+        },
+        {
+          "Date": "2025-01",
+          "SKU_ID": "ELA-007",
+          "Region": "Latin America",
+          "Units_Sold": 30.0,
+          "Shipped_Units": 3.0
+        },
+        {
+          "Date": "2021-07",
+          "SKU_ID": "ELA-014",
+          "Region": "India",
+          "Units_Sold": 20.0,
+          "Shipped_Units": 18.0
+        },
+        {
+          "Date": "2021-08",
+          "SKU_ID": "ELA-014",
+          "Region": "India",
+          "Units_Sold": 20.0,
+          "Shipped_Units": 21.0
+        }
+      ]
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "sales_before_launch",
+      "rows_affected": 16,
+      "action": "dropped (rule 5)",
+      "category": "error",
+      "detail": "",
+      "examples": [
+        {
+          "Date": "2025-02",
+          "SKU_ID": "BSS-018",
+          "Region": "North America",
+          "Units_Sold": 16.0
+        },
+        {
+          "Date": "2025-03",
+          "SKU_ID": "BSS-018",
+          "Region": "North America",
+          "Units_Sold": 20.0
+        },
+        {
+          "Date": "2025-04",
+          "SKU_ID": "BSS-018",
+          "Region": "North America",
+          "Units_Sold": 17.0
+        },
+        {
+          "Date": "2025-05",
+          "SKU_ID": "BSS-018",
+          "Region": "North America",
+          "Units_Sold": 39.0
+        },
+        {
+          "Date": "2025-02",
+          "SKU_ID": "BSS-018",
+          "Region": "Latin America",
+          "Units_Sold": 14.0
+        }
+      ]
+    },
+    {
+      "file": "inventory_stockouts.csv",
+      "issue_type": "stockout_without_train_row",
+      "rows_affected": 26,
+      "action": "kept; demand row created from Requested_Units",
+      "category": "info",
+      "detail": "",
+      "examples": []
+    },
+    {
+      "file": "macro_indicators.csv",
+      "issue_type": "duplicate_month",
+      "rows_affected": 1,
+      "action": "averaged the duplicate rows",
+      "category": "error",
+      "detail": "two different rows for the same month, no way to tell which is right",
+      "examples": [
+        {
+          "Date": "2022-06",
+          "Year": 2022,
+          "Month": 6,
+          "ISM_Manufacturing_PMI": 53.9,
+          "Auto_Production_YoY_Pct": 3.2,
+          "Vehicle_Inventory_Days": 33.9,
+          "Raw_Material_Cost_Index": 127.9,
+          "New_Vehicle_Orders_Index": 102.9,
+          "Industrial_Util_Rate_Pct": 80.0,
+          "Fuel_Price_Index": 142.8,
+          "EV_Adoption_Index": 68.6
+        },
+        {
+          "Date": "2022-06",
+          "Year": 2022,
+          "Month": 6,
+          "ISM_Manufacturing_PMI": 52.7,
+          "Auto_Production_YoY_Pct": 3.2,
+          "Vehicle_Inventory_Days": 33.9,
+          "Raw_Material_Cost_Index": 127.9,
+          "New_Vehicle_Orders_Index": 104.3,
+          "Industrial_Util_Rate_Pct": 80.0,
+          "Fuel_Price_Index": 142.8,
+          "EV_Adoption_Index": 68.6
+        }
+      ]
+    },
+    {
+      "file": "macro_indicators.csv",
+      "issue_type": "pmi_decimal_shift",
+      "rows_affected": 1,
+      "action": "multiplied by 10",
+      "category": "error",
+      "detail": "",
+      "examples": [
+        {
+          "Date": "2023-05",
+          "ISM_Manufacturing_PMI": 4.79
+        }
+      ]
+    },
+    {
+      "file": "macro_indicators.csv",
+      "issue_type": "yoy_stored_as_fraction",
+      "rows_affected": 12,
+      "action": "multiplied by 100",
+      "category": "error",
+      "detail": "",
+      "examples": [
+        {
+          "Date": "2019-01",
+          "Auto_Production_YoY_Pct": -0.015
+        },
+        {
+          "Date": "2019-02",
+          "Auto_Production_YoY_Pct": -0.023
+        },
+        {
+          "Date": "2019-03",
+          "Auto_Production_YoY_Pct": -0.032
+        },
+        {
+          "Date": "2019-04",
+          "Auto_Production_YoY_Pct": -0.019
+        },
+        {
+          "Date": "2019-05",
+          "Auto_Production_YoY_Pct": -0.014
+        }
+      ]
+    },
+    {
+      "file": "macro_indicators.csv",
+      "issue_type": "missing_value",
+      "rows_affected": 5,
+      "action": "linear interpolation in time",
+      "category": "error",
+      "detail": "",
+      "examples": [
+        {
+          "Date": "2019-07",
+          "column": "Vehicle_Inventory_Days"
+        },
+        {
+          "Date": "2020-09",
+          "column": "Fuel_Price_Index"
+        },
+        {
+          "Date": "2021-02",
+          "column": "Industrial_Util_Rate_Pct"
+        },
+        {
+          "Date": "2023-08",
+          "column": "New_Vehicle_Orders_Index"
+        },
+        {
+          "Date": "2024-11",
+          "column": "EV_Adoption_Index"
+        }
+      ]
+    },
+    {
+      "file": "events_calendar.csv",
+      "issue_type": "open_ended_event",
+      "rows_affected": 1,
+      "action": "treated as running to 2028-05 (permanent effect)",
+      "category": "info",
+      "detail": "",
+      "examples": [
+        {
+          "Event_ID": "EV-052",
+          "Description": "Helios Auto Parts commissions second Indian assembly line (permanent capacity increase)"
+        }
+      ]
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "missing_row_internal",
+      "rows_affected": 956,
+      "action": "kept as NaN (not zero, rule 3); imputed for demand history",
+      "category": "error",
+      "detail": "of which 4 in LatAm ERP migration window (EV-033)",
+      "examples": []
+    },
+    {
+      "file": "train.csv",
+      "issue_type": "missing_rows_after_last_order",
+      "rows_affected": 16,
+      "action": "kept as NaN; reviewed as possible lost account",
+      "category": "real_event",
+      "detail": "",
+      "examples": []
+    }
+  ]
+}

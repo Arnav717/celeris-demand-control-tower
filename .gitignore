@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+data/raw/
+data/interim/
+*.zip
+.DS_Store
+.streamlit/secrets.toml
+*.egg-info/
+data/processed/
+docs/problem_statement.pdf
