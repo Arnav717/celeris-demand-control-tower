@@ -6,8 +6,8 @@ aggregate, origin and month; its empirical 10th / 90th percentiles by horizon bu
 divided by the median ratio, are applied to the bottom-up P50 of the final forecast.
 
 Dividing by the median keeps the band centred on the P50: the backtest under-forecast
-at older origins (bias -6.5% / -8.1% / -3.4% / -0.6% across the four cutoffs) but the
-bias has shrunk to ~0 at the most recent one, so only the spread is carried forward,
+at older origins (bias -6.8% / -8.4% / -4.2% / -1.5% across the four cutoffs) but the
+bias shrinks towards 0 at recent ones, so only the spread is carried forward,
 not the old bias. The P50 itself stays bottom-up, so aggregates add up to the SKU rows.
 """
 from __future__ import annotations

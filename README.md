@@ -14,7 +14,7 @@ make setup                       # or: uv venv --python 3.12 .venv && uv pip ins
 # 2. data: put the organiser's zip at data/raw/student_data.zip, then
 make data                        # extracts the CSVs into data/raw/
 
-# 3. whole pipeline (clean -> anomalies -> features -> forecast), ~15 min on 16 cores
+# 3. whole pipeline (clean -> anomalies -> features -> forecast), ~25 min on 16 cores
 make all                         # = python -m celeris all
 
 # 4. tests
@@ -49,19 +49,26 @@ final model.
 | 12-month moving average | 0.494 | −3.1 % |
 | Seasonal index × level | 0.316 | −2.9 % |
 | TSB (intermittent) | 0.493 | −6.0 % |
-| LightGBM Tweedie, without macro change features | 0.2745 | −4.0 % |
-| **LightGBM Tweedie (final)** | **0.2710** | −4.7 % |
+| LightGBM Tweedie, history + calendar + events only | 0.2745 | −4.0 % |
+| + macro change-from-origin features | 0.2710 | −4.7 % |
+| **+ 3-seed bagging (final)** | **0.2700** | −5.2 % |
 
-* Summed bottom-up: family-level WAPE 7.1 %, region-level 6.6 % (8.2 % / 7.6 % before the
+* Summed bottom-up: family-level WAPE 7.2 %, region-level 6.7 % (8.2 % / 7.6 % before the
   macro change features).
 * SKU-level P10–P90 coverage 80.0 % (target 80 %).
-* Bias by origin: −6.5 %, −8.1 %, −3.4 %, −0.6 %, shrinking towards zero for recent
+* Bias by origin: −6.8 %, −8.4 %, −4.2 %, −1.5 %, shrinking towards zero for recent
   origins, so no blanket correction is applied (a leave-one-origin-out correction made
   the two most recent origins worse).
-* Tried and rejected (no gain beyond noise, ±0.0006 WAPE): aggregate family / region /
-  customer growth features, seasonally clean momentum, recency weighting, wider macro
-  lag sets, 127 / 31 leaves, lower learning rate, Tweedie power 1.1 / 1.5, blends with the
-  seasonal-index baseline or the L1 model.
+* Headroom: an oracle that knows each series' true centred 13-month level and seasonal
+  profile (future included) scores WAPE 0.215 on the same rows, so roughly 0.2 is
+  month-to-month noise that no model can predict. Ordering cycles are near-deterministic
+  (98–99 % of gaps between orders equal the series' cycle) and the model already places
+  order months correctly; zero-demand months are 1.4 % of the error.
+* Tried and rejected (no gain beyond noise, within ±0.001 WAPE or worse at family level):
+  aggregate family / region / customer growth features, seasonally clean momentum,
+  pooled family × region seasonal index with deseasonalised level, recency weighting,
+  wider macro lag sets, 127 / 31 leaves, lower learning rate, Tweedie power 1.1 / 1.5,
+  blends with the seasonal-index baseline or the L1 model.
 
 ## Repository layout
 
@@ -128,7 +135,7 @@ the EV shift.
   target month and the value that drove the origin (log change for index-type
   indicators). This lets the model carry the macro outlook into the 19-month horizon
   instead of extrapolating recent history.
-* Point forecast = Tweedie GBM; P10/P90 from quantile GBMs (SKU × Region level).
+* Point forecast = Tweedie GBM, average of 3 seeds; P10/P90 from quantile GBMs (SKU × Region level).
 * Aggregate bands (family, region, total): bottom-up P50 × empirical 10th / 90th
   percentile of actual ÷ forecast for that aggregate in the backtest, by horizon bucket
   (summing SKU-level P10/P90 would be far too wide).
