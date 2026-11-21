@@ -55,7 +55,7 @@ def norm_channel(s: str | float) -> str | None:
     return CHANNEL_MAP.get(re.sub(r"\s+", " ", s.strip().lower()))
 
 
-_SUFFIX_RE = re.compile(r"[\s,]*\b(inc|ltd|llc|gmbh|corp|co|plc)\.?\s*$", re.I)
+_SUFFIX_RE = re.compile(r"[\s,]*\b(inc|ltd|llc|gmbh|corp|co|plc)\.?\s*$", re.IGNORECASE)
 
 
 def customer_key(name: str) -> str:

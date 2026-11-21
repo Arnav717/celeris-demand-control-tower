@@ -196,7 +196,7 @@ def fix_price_units_revenue(df: pd.DataFrame, log: DQLog) -> pd.DataFrame:
         _flag(df, m_, name)
 
     # ---- units: reconcile with revenue.
-    tol = lambda a, b: _close(a, b, rel=0.005, abs_=1.0)  # noqa: E731
+    tol = lambda a, b: _close(a, b, rel=0.005, abs_=1.0)
     cons_raw = tol(u * p, r)          # consistent in booked currency/scale
     cons_star = tol(u * p_star, r)     # consistent with corrected USD price
     consistent = (cons_raw | cons_star) & u.notna() & r.notna()

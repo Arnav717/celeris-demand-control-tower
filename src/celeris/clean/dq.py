@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -60,7 +60,7 @@ class DQLog:
     def write(self, out_dir: Path) -> None:
         out_dir.mkdir(parents=True, exist_ok=True)
         report = {
-            "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "row_counts": self.counts,
             "n_issue_types": len(self.issues),
             "issues": [asdict(i) for i in self.issues],

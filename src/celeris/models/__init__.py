@@ -4,6 +4,7 @@ Outputs:
   outputs/submission.csv                 Date, SKU_ID, Region, Units_Sold_Forecast
   data/processed/forecast.parquet        test rows + P10/P50/P90 + revenue
   data/processed/backtest_predictions.parquet
+  data/processed/forecast_aggregates.parquet   family / region / total P10-P50-P90
   reports/backtest_metrics.json          WAPE / bias tables
 """
 from __future__ import annotations
@@ -16,17 +17,18 @@ import pandas as pd
 
 from celeris.config import OUTPUTS, PROCESSED, REPORTS, TRAIN_END
 from celeris.features.build import MIDX, MONTHS, Exog, Panel, build_frame
+from celeris.models.aggregate import aggregate_forecast, interval_factors
 from celeris.models.backtest import CUTOFFS, GBM_SPECS, metrics, run_backtest
+from celeris.models.baselines import seasonal_index_level
 from celeris.models.gbm import GBM
 from celeris.models.lifecycle import apply_lifecycle
-from celeris.models.baselines import seasonal_index_level
 
 TRAIN_ORIGIN_START = "2020-06"
 ORIGIN_STRIDE = 2
 
 
 def load(out_dir=PROCESSED):
-    r = lambda n: pd.read_parquet(out_dir / f"{n}.parquet")  # noqa: E731
+    r = lambda n: pd.read_parquet(out_dir / f"{n}.parquet")
     return r("demand"), r("test"), r("sku_master"), r("macro"), r("events"), r("events_monthly")
 
 
@@ -113,6 +115,11 @@ def run(out_dir=PROCESSED) -> None:
 
     fc, imp = final_forecast(P, X, train_frame, test, master, demand)
     fc.to_parquet(out_dir / "forecast.parquet", index=False)
+    bt_path = out_dir / "backtest_predictions.parquet"
+    if bt_path.exists():
+        factors = interval_factors(pd.read_parquet(bt_path))
+        factors.to_parquet(out_dir / "aggregate_interval_factors.parquet", index=False)
+        aggregate_forecast(fc, factors).to_parquet(out_dir / "forecast_aggregates.parquet", index=False)
     sub = fc[["Date", "SKU_ID", "Region", "Units_Sold_Forecast"]]
     assert len(sub) == len(test) and sub["Units_Sold_Forecast"].ge(0).all()
     sub.to_csv(OUTPUTS / "submission.csv", index=False)

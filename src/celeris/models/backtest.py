@@ -22,8 +22,8 @@ def bias(y, f) -> float:
 
 
 GBM_SPECS = {
-    "gbm_tweedie": dict(objective="tweedie", params={"tweedie_variance_power": 1.3}, rounds=600),
-    "gbm_l1": dict(objective="l1", rounds=600),
+    "gbm_tweedie": {"objective": "tweedie", "params": {"tweedie_variance_power": 1.3}, "rounds": 600},
+    "gbm_l1": {"objective": "l1", "rounds": 600},
 }
 
 

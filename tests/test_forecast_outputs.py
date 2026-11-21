@@ -40,6 +40,18 @@ def test_submission_matches_test_rows():
     assert np.issubdtype(sub["Units_Sold_Forecast"].dtype, np.integer)
 
 
+@_need(PROCESSED / "forecast_aggregates.parquet")
+def test_aggregates_add_up_and_bands_ordered():
+    a = pd.read_parquet(PROCESSED / "forecast_aggregates.parquet")
+    fc = pd.read_parquet(PROCESSED / "forecast.parquet")
+    assert (a["p10"] <= a["p50"] + 1e-9).all() and (a["p50"] <= a["p90"] + 1e-9).all()
+    tot = a[a["level"] == "Total"].set_index("Date")["p50"]
+    for lvl in ("Product_Family", "Region"):
+        s = a[a["level"] == lvl].groupby("Date")["p50"].sum()
+        assert np.allclose(s.reindex(tot.index), tot)
+    assert np.isclose(tot.sum(), fc["p50"].sum())
+
+
 @_need(PROCESSED / "forecast.parquet")
 def test_forecast_quantiles_ordered_and_lifecycle_zero():
     fc = pd.read_parquet(PROCESSED / "forecast.parquet")

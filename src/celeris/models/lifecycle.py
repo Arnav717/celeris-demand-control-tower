@@ -114,4 +114,4 @@ def months_index(dates) -> np.ndarray:
     return np.array([MIDX[d] for d in dates])
 
 
-__all__ = ["apply_lifecycle", "ramp_curve", "rundown_multiplier", "MONTHS"]
+__all__ = ["MONTHS", "apply_lifecycle", "ramp_curve", "rundown_multiplier"]

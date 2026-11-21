@@ -21,6 +21,9 @@ MACRO = ["ISM_Manufacturing_PMI", "Auto_Production_YoY_Pct", "Vehicle_Inventory_
          "Raw_Material_Cost_Index", "New_Vehicle_Orders_Index", "Industrial_Util_Rate_Pct",
          "Fuel_Price_Index", "EV_Adoption_Index"]
 CATS = ["Product_Family", "Region", "Sales_Channel", "Customer_Name", "Powertrain_Application", "Size_Class"]
+INDEX_INDICATORS = {"Raw_Material_Cost_Index", "New_Vehicle_Orders_Index", "Fuel_Price_Index",
+                    "EV_Adoption_Index"}
+MACRO_CHG_LAGS = (0, 2, 3, 5)  # leading-indicator lags found in the drivers analysis
 
 
 # ----------------------------------------------------------------------------- inputs
@@ -82,6 +85,9 @@ class Exog:
         M = panel.M
         mac = macro.set_index("Date").reindex(MONTHS)[MACRO].ffill().bfill().to_numpy()
         self.macro = mac  # (M, 8)
+        # index-type indicators in logs (growth), level-type (PMI, %, days) as they are
+        self.macro_t = np.column_stack([np.log(mac[:, j]) if n in INDEX_INDICATORS else mac[:, j]
+                                        for j, n in enumerate(MACRO)])
         self.rise = _price_rise_by_year(events)
         meta = panel.meta
 
@@ -135,7 +141,7 @@ def _nanmean(a, axis=1):
 
 def _last_nonzero(Y: np.ndarray) -> np.ndarray:
     """LNZ[s, t] = index of last month <= t with Y > 0 (or -1)."""
-    S, M = Y.shape
+    _S, M = Y.shape
     idx = np.where(np.nan_to_num(Y) > 0, np.arange(M), -1)
     return np.maximum.accumulate(idx, axis=1)
 
@@ -212,6 +218,10 @@ def _target_features(P: Panel, X: Exog, t: int, h: int, of: dict) -> dict[str, n
         for lag in (1, 3, 6):
             f[f"{name}_l{lag}"] = np.full(S, X.macro[m - lag, j])
         f[f"{name}_chg"] = np.full(S, X.macro[m - 1, j] - X.macro[t, j])
+        # change between the indicator driving the target month and the one that drove
+        # the origin, at each leading lag (macro file covers the forecast window)
+        for lag in MACRO_CHG_LAGS:
+            f[f"{name}_d{lag}"] = np.full(S, X.macro_t[m - lag, j] - X.macro_t[t - lag, j])
     mo, yr = int(MONTHS[m][5:]), int(MONTHS[m][:4])
     f["price_rise_next_jan"] = np.full(S, X.rise.get(yr + 1, 0.0) if mo in (11, 12) else 0.0)
     f["price_rise_this_jan"] = np.full(S, X.rise.get(yr, 0.0) if mo in (1, 2) else 0.0)
