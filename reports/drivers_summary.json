@@ -1,0 +1,107 @@
+{
+  "top_indicator_per_family": [
+    {
+      "Product_Family": "Brake & Safety Systems",
+      "indicator": "Fuel_Price_Index",
+      "lag": 0,
+      "corr": -0.743
+    },
+    {
+      "Product_Family": "Chassis & Structural",
+      "indicator": "Auto_Production_YoY_Pct",
+      "lag": 5,
+      "corr": 0.889
+    },
+    {
+      "Product_Family": "Electrical Assemblies",
+      "indicator": "New_Vehicle_Orders_Index",
+      "lag": 2,
+      "corr": 0.817
+    },
+    {
+      "Product_Family": "Hydraulic Systems",
+      "indicator": "New_Vehicle_Orders_Index",
+      "lag": 3,
+      "corr": 0.851
+    },
+    {
+      "Product_Family": "Powertrain Components",
+      "indicator": "Industrial_Util_Rate_Pct",
+      "lag": 1,
+      "corr": 0.637
+    },
+    {
+      "Product_Family": "Precision Machined Parts",
+      "indicator": "Industrial_Util_Rate_Pct",
+      "lag": 2,
+      "corr": 0.834
+    },
+    {
+      "Product_Family": "Thermal Management",
+      "indicator": "Auto_Production_YoY_Pct",
+      "lag": 5,
+      "corr": 0.855
+    }
+  ],
+  "share_family_indicator_pairs_with_stable_lag_(+-2m)": 0.321,
+  "intermittency_classes": {
+    "smooth": 2208,
+    "intermittent": 760,
+    "erratic": 72,
+    "lumpy": 18
+  },
+  "ev_shift": {
+    "share_first_12m": {
+      "EV": 0.0,
+      "ICE": 0.241,
+      "Universal": 0.759
+    },
+    "share_last_12m": {
+      "EV": 0.098,
+      "ICE": 0.131,
+      "Universal": 0.771
+    },
+    "yoy_growth_pct_by_year": {
+      "2020": {
+        "EV": 7655.6,
+        "ICE": -27.2,
+        "Universal": -17.9
+      },
+      "2021": {
+        "EV": 592.8,
+        "ICE": 39.3,
+        "Universal": 50.2
+      },
+      "2022": {
+        "EV": 91.6,
+        "ICE": -16.3,
+        "Universal": -6.6
+      },
+      "2023": {
+        "EV": 98.9,
+        "ICE": -12.7,
+        "Universal": 3.0
+      },
+      "2024": {
+        "EV": 71.7,
+        "ICE": -0.2,
+        "Universal": 9.8
+      },
+      "2025": {
+        "EV": 5.5,
+        "ICE": -7.8,
+        "Universal": -1.7
+      },
+      "2026": {
+        "EV": -14.2,
+        "ICE": -14.2,
+        "Universal": -13.6
+      }
+    },
+    "corr_share_vs_ev_index": {
+      "EV": 0.979,
+      "ICE": -0.988,
+      "Universal": 0.104
+    }
+  }
+}
