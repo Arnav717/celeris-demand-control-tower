@@ -26,8 +26,8 @@ forecast:
 test:
 	$(PY) -m pytest -q
 
-app:
-	$(PY) -m streamlit run app/app.py
+app:              ## start the dashboard on http://127.0.0.1:8501
+	$(PY) -m celeris.dashboard
 
 lint:
-	$(PY) -m ruff check src tests app
+	$(PY) -m ruff check src tests

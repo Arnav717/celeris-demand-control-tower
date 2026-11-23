@@ -19,6 +19,9 @@ make all                         # = python -m celeris all
 
 # 4. tests
 make test
+
+# 5. dashboard: http://127.0.0.1:8501
+make app                         # = python -m celeris.dashboard [--host 0.0.0.0 --port 8501]
 ```
 
 Run single stages with `python -m celeris clean|anomalies|features|forecast`.
@@ -39,6 +42,35 @@ produced with.
 | `reports/backtest_metrics.json` | Rolling-origin WAPE / bias by model, family, region, horizon |
 | `data/processed/forecast_aggregates.parquet` | Family / region / total forecast with calibrated P10 / P90 bands |
 | `data/processed/*.parquet` | Clean tables the dashboard reads (train_clean, panel, demand, forecast, backtest, drivers…) |
+
+## Dashboard: planning control tower
+
+`make app` starts a FastAPI backend with a single-page UI (ECharts, vendored, so it works
+offline). It is one app in two parts, **what happened** (cleaned history) and **what will
+happen** (forecast). All views share the same filters (family, SKU, region, channel,
+customer), and the filter state is kept in the URL, so any view can be shared as a link.
+Every number is computed from `data/processed`, `reports/` and `outputs/` at start-up;
+nothing is typed in by hand.
+
+| View | Part | Shows |
+|---|---|---|
+| Executive overview | both | Units / revenue from history into the forecast on one timeline (forecast shaded, P10–P90 band), mix by family, region and channel, headline 19-month forecast, auto-written summary |
+| Data health | training | Issues by type and file, rows affected, raw vs clean vs unconstrained demand, rows per file, full issue log |
+| Demand explorer | training | Click-to-drill family → SKU → region → customer; trend, year × month seasonality heatmap, seasonal index, zero months, intermittency class, lifecycle |
+| Anomaly monitor | training | Demand line with one lane per flag category (stockout, data error, real event, suspected, data gap), structural breaks, register with type / reason / action, events in scope |
+| Forecast & accuracy | prediction | Forecast vs history with P10–P90, backtest fan by origin, model leaderboard, WAPE by horizon / family / region, bias, interval coverage, feature importance, all recomputed for the selection |
+| Stockouts & lost sales | optional | Lost and back-ordered units, fill rate, listed vs inferred stockouts, reasons, worst SKU × region |
+| Macro drivers | optional | Family × indicator lead/lag heatmap, correlation by lead, standardised overlay, lag stability, EV shift |
+| Exception list | optional | Series to review first (forecast jump/drop, wide range, low past accuracy, recent stockouts, level shifts, EOL, launches) with a suggested action, ranked by revenue at stake |
+| Procurement plan (P90) | optional | P50 vs P90 quantities per SKU for a 3 / 6 / 12 / 19-month window, buffer units and value |
+| What-if scenarios | optional | Sustained shock to any macro indicator (e.g. PMI −3); response per family from historical elasticities at the best lead, with fit quality |
+| Lifecycle | optional | EOL run-downs, launches and the SKUs they replace, per-SKU history + forecast |
+| Data download | optional | CSV of forecast, history, anomalies, procurement plan, exceptions, backtest, submission, all filtered |
+
+Forecast bands for a selection: whole company, one family or one region use the
+calibrated aggregate bands from the pipeline; a single series uses its own quantiles;
+any other subset combines the series bands in quadrature, floored at the family-level
+backtest spread. The JSON API behind every view is documented at `/api/docs`.
 
 ## Results (rolling-origin backtest)
 
@@ -86,8 +118,8 @@ src/celeris/
   anomalies/   unconstrained demand, outlier detection + event attribution, structural checks
   features/    direct multi-horizon feature matrix, macro lead/lag drivers, intermittency
   models/      baselines, LightGBM, rolling-origin backtest, lifecycle rules, final forecast
-tests/         unit tests (labels) + invariants on every output (business rules 1-7)
-app/           dashboard (reads data/processed only)
+tests/         unit tests (labels), invariants on every output (business rules 1-7), dashboard checks
+  dashboard/   FastAPI backend (data.py: all view logic) + static single-page UI
 ```
 
 ## Method (short)
