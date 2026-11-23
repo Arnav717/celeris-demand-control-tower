@@ -20,7 +20,7 @@ from celeris.features.build import MIDX, MONTHS, Exog, Panel, build_frame
 from celeris.models.aggregate import aggregate_forecast, interval_factors
 from celeris.models.backtest import CUTOFFS, GBM_SPECS, metrics, run_backtest
 from celeris.models.baselines import seasonal_index_level
-from celeris.models.gbm import GBM
+from celeris.models.gbm import GBM, oneoff_uplift
 from celeris.models.lifecycle import apply_lifecycle
 
 TRAIN_ORIGIN_START = "2020-06"
@@ -46,7 +46,8 @@ def final_forecast(P, X, train_frame, test, master, demand) -> tuple[pd.DataFram
     # Point forecast: Tweedie GBM. In the backtest it matched the Tweedie+L1 ensemble on
     # WAPE (0.2745 vs 0.2749) with smaller bias, and was best at family level.
     models = {"gbm_tweedie": GBM(**GBM_SPECS["gbm_tweedie"]).fit(train_frame)}
-    p50 = models["gbm_tweedie"].predict(fr)
+    # scale by the one-off share that the capped training target leaves out
+    p50 = models["gbm_tweedie"].predict(fr) * oneoff_uplift(train_frame, t)
     q10 = GBM("quantile", alpha=0.1, rounds=500).fit(train_frame).predict(fr)
     q90 = GBM("quantile", alpha=0.9, rounds=500).fit(train_frame).predict(fr)
     fr_out = pd.DataFrame({

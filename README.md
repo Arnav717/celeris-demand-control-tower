@@ -53,14 +53,20 @@ produced with.
 | TSB (intermittent) | 0.493 | −6.0 % |
 | LightGBM Tweedie, history + calendar + events only | 0.2745 | −4.0 % |
 | + macro change-from-origin features | 0.2710 | −4.7 % |
-| **+ 3-seed bagging (final)** | **0.2700** | −5.2 % |
+| + 3-seed bagging | 0.2700 | −5.2 % |
+| **+ one-off uplift (final)** | **0.2701** | **−4.2 %** |
 
-* Summed bottom-up: family-level WAPE 7.2 %, region-level 6.7 % (8.2 % / 7.6 % before the
-  macro change features).
-* SKU-level P10–P90 coverage 80.0 % (target 80 %).
-* Bias by origin: −6.8 %, −8.4 %, −4.2 %, −1.5 %, shrinking towards zero for recent
-  origins, so no blanket correction is applied (a leave-one-origin-out correction made
-  the two most recent origins worse).
+* Summed bottom-up: family-level WAPE 6.8 %, region-level 6.2 % (seasonal naive 9.8 % /
+  8.3 %; 8.2 % / 7.6 % before the macro change features).
+* SKU-level P10–P90 coverage 80.4 % over all 4 origins (80.5 / 79.8 / 80.0 / 81.1 %;
+  target 80 %).
+* By horizon: WAPE 0.252 at month 1 → 0.271 at month 19. By region: North America 0.242
+  → Middle East & Africa 0.345 (shortest history, entered 2022). By family: Powertrain
+  0.262 → Electrical Assemblies 0.288.
+* Bias by origin: −6.0 %, −7.4 %, −3.0 %, −0.2 %, shrinking towards zero for recent
+  origins. Roughly 1 point is the capped one-off orders, which the uplift puts back;
+  no further blanket correction is applied (a leave-one-origin-out correction made the
+  two most recent origins worse).
 * Headroom: an oracle that knows each series' true centred 13-month level and seasonal
   profile (future included) scores WAPE 0.215 on the same rows, so roughly 0.2 is
   month-to-month noise that no model can predict. Ordering cycles are near-deterministic
@@ -137,7 +143,10 @@ the EV shift.
   target month and the value that drove the origin (log change for index-type
   indicators). This lets the model carry the macro outlook into the 19-month horizon
   instead of extrapolating recent history.
-* Point forecast = Tweedie GBM, average of 3 seeds; P10/P90 from quantile GBMs (SKU × Region level).
+* Point forecast = Tweedie GBM, average of 3 seeds, × one-off uplift: one-off orders are
+  capped in the training target but keep happening, so the forecast is scaled by
+  demand ÷ capped target over the last 24 months before the origin (1.010–1.013).
+* P10/P90 from quantile GBMs (SKU × Region level).
 * Aggregate bands (family, region, total): bottom-up P50 × empirical 10th / 90th
   percentile of actual ÷ forecast for that aggregate in the backtest, by horizon bucket
   (summing SKU-level P10/P90 would be far too wide).

@@ -6,7 +6,7 @@ import pandas as pd
 
 from celeris.features.build import MIDX, MONTHS, build_frame
 from celeris.models.baselines import BASELINES
-from celeris.models.gbm import GBM
+from celeris.models.gbm import GBM, oneoff_uplift
 
 CUTOFFS = ["2023-10", "2024-04", "2024-10", "2025-03"]  # last origin with 19 months of actuals
 
@@ -28,7 +28,7 @@ GBM_SPECS = {
 }
 
 
-def run_backtest(P, X, train_frame: pd.DataFrame, cutoffs=CUTOFFS, quantile_cutoff: str | None = "2024-10"):
+def run_backtest(P, X, train_frame: pd.DataFrame, cutoffs=CUTOFFS, quantiles: bool = True):
     preds = []
     for c in cutoffs:
         t = MIDX[c]
@@ -39,15 +39,16 @@ def run_backtest(P, X, train_frame: pd.DataFrame, cutoffs=CUTOFFS, quantile_cuto
         for name, fn in BASELINES.items():
             F = fn(P.Y, t)
             out[name] = F[va["series"], va["h"].astype(int) - 1]
+        k = oneoff_uplift(train_frame, t)
         for name, spec in GBM_SPECS.items():
-            out[name] = GBM(**spec).fit(tr).predict(va)
+            out[name] = GBM(**spec).fit(tr).predict(va) * k
         out["ensemble"] = 0.5 * (out["gbm_tweedie"] + out["gbm_l1"])
-        if c == quantile_cutoff:
+        if quantiles:
             for q in (0.1, 0.9):
                 out[f"q{int(q * 100)}"] = GBM("quantile", alpha=q, rounds=500).fit(tr).predict(va)
         out["cutoff"] = c
         preds.append(out)
-        print(f"  backtest {c}: ensemble WAPE {wape(out['y_demand'], out['ensemble']):.4f}", flush=True)
+        print(f"  backtest {c}: uplift {k:.4f}, ensemble WAPE {wape(out['y_demand'], out['ensemble']):.4f}", flush=True)
     bt = pd.concat(preds, ignore_index=True)
     meta = P.meta
     for col in ["SKU_ID", "Region", "Product_Family", "Sales_Channel", "Customer_Name"]:
@@ -77,10 +78,11 @@ def metrics(bt: pd.DataFrame, models: list[str]) -> dict[str, pd.DataFrame]:
         out[f"aggregate_{lvl}"] = pd.DataFrame(rows)
     if "q10" in bt:
         q = bt.dropna(subset=["q10", "q90"])
-        out["interval_coverage"] = pd.DataFrame([{
-            "cutoff": q["cutoff"].iloc[0],
-            "p10_p90_coverage": float(((q["y_demand"] >= q["q10"]) & (q["y_demand"] <= q["q90"])).mean()),
-            "below_p10": float((q["y_demand"] < q["q10"]).mean()),
-            "above_p90": float((q["y_demand"] > q["q90"]).mean()),
-        }])
+        lo, hi = np.minimum(q["q10"], q["gbm_tweedie"]), np.maximum(q["q90"], q["gbm_tweedie"])
+        q = q.assign(_in=(q["y_demand"] >= lo) & (q["y_demand"] <= hi),
+                     _below=q["y_demand"] < lo, _above=q["y_demand"] > hi)
+        rows = [{"cutoff": c, "p10_p90_coverage": float(g["_in"].mean()),
+                 "below_p10": float(g["_below"].mean()), "above_p90": float(g["_above"].mean())}
+                for c, g in [*q.groupby("cutoff"), ("all", q)]]
+        out["interval_coverage"] = pd.DataFrame(rows)
     return out
