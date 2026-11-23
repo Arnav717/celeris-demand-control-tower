@@ -9,16 +9,21 @@ error in units: the loss lines up with WAPE while one model serves all series si
 """
 from __future__ import annotations
 
+import os
+
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
 
 from celeris.features.build import CATS, feature_columns
 
+# capped by default: all-core turbo on laptops can trip power / thermal limits
+THREADS = int(os.environ.get("CELERIS_THREADS", "4"))
+
 BASE_PARAMS = {
     "learning_rate": 0.05, "num_leaves": 63, "min_data_in_leaf": 200, "feature_fraction": 0.8,
     "bagging_fraction": 0.8, "bagging_freq": 1, "lambda_l2": 1.0, "max_bin": 255, "verbose": -1,
-    "num_threads": 0, "seed": 7,
+    "num_threads": THREADS, "seed": 7,
 }
 
 
@@ -48,7 +53,7 @@ class GBM:
         return self
 
     def predict(self, df: pd.DataFrame) -> np.ndarray:
-        raw = np.mean([m.predict(df[self.cols], num_threads=0) for m in self.models], axis=0)
+        raw = np.mean([m.predict(df[self.cols], num_threads=THREADS) for m in self.models], axis=0)
         return np.clip(raw * df["_scale"].to_numpy(), 0, None)
 
     def importance(self) -> pd.DataFrame:
