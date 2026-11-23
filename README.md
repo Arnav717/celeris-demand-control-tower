@@ -9,7 +9,7 @@ planning dashboard from the pipeline outputs.
 
 ```bash
 # 1. environment (Python 3.12, uv)
-make setup                       # or: uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
+make setup                       # or: python3.12 -m venv .venv && .venv/bin/pip install -r requirements.lock -e ".[dev]"
 
 # 2. data: put the organiser's zip at data/raw/student_data.zip, then
 make data                        # extracts the CSVs into data/raw/
@@ -23,7 +23,9 @@ make test
 
 Run single stages with `python -m celeris clean|anomalies|features|forecast`.
 Set `CELERIS_SKIP_BACKTEST=1` to skip the rolling-origin backtest and only refit the
-final model.
+final model. LightGBM uses `CELERIS_THREADS` threads (default 4); raise it on a machine
+with good cooling. `requirements.lock` pins the exact library versions the results were
+produced with.
 
 ## Outputs
 

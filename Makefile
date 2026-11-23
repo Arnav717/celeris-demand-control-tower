@@ -3,7 +3,7 @@ PY ?= .venv/bin/python
 .PHONY: setup data all clean-data anomalies features forecast test app lint
 
 setup:            ## create venv and install
-	uv venv --python 3.12 .venv && uv pip install --python $(PY) -e ".[dev]"
+	uv venv --python 3.12 .venv && uv pip install --python $(PY) -r requirements.lock -e ".[dev]"
 
 data:             ## unzip dataset into data/raw (expects data/raw/student_data.zip)
 	cd data/raw && unzip -oj student_data.zip '*.csv'
