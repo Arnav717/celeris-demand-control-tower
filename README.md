@@ -5,6 +5,8 @@ separate data errors from real demand events, estimate unconstrained demand, for
 `Units_Sold` for every row of `test.csv` (2026-11 → 2028-05, 19 months) and serve a
 planning dashboard from the pipeline outputs.
 
+**Demo video (2:40, every dashboard view):** [docs/demo.mp4](docs/demo.mp4)
+
 ## Quick start
 
 ```bash
