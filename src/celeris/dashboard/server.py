@@ -6,11 +6,12 @@ shared filters (family, sku, region, channel, customer) as repeated query parame
 from __future__ import annotations
 
 import io
+import re
 from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 
@@ -41,9 +42,19 @@ def _warm() -> None:
     store()
 
 
+def _versioned(match: re.Match) -> str:
+    """Append the file's mtime so browsers fetch an asset again after it changes."""
+    path = match.group(1)
+    f = STATIC / path
+    v = int(f.stat().st_mtime) if f.exists() else 0
+    return f'"/static/{path}?v={v}"'
+
+
 @app.get("/", include_in_schema=False)
-def index() -> FileResponse:
-    return FileResponse(STATIC / "index.html")
+def index() -> HTMLResponse:
+    html = (STATIC / "index.html").read_text()
+    html = re.sub(r'"/static/([^"?]+)"', _versioned, html)
+    return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/api/meta")

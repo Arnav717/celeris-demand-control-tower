@@ -79,3 +79,14 @@ def test_zero_shock_changes_nothing(s):
 def test_procurement_p90_covers_p50(s):
     p = s.procurement(make_filters(), 6)["kpi"]
     assert p["p90_units"] >= p["p50_units"] > 0
+
+
+def test_index_versions_static_assets():
+    """Asset URLs carry the file mtime so a browser never runs a stale app.js."""
+    from celeris.dashboard.server import index
+
+    r = index()
+    html = r.body.decode()
+    assert r.headers["cache-control"] == "no-cache"
+    for asset in ["style.css", "app.js", "vendor/echarts.min.js"]:
+        assert f'"/static/{asset}?v=' in html

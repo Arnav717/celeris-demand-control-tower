@@ -277,6 +277,12 @@ function optionsFor(dim) {
   for (const v of S.f[dim]) set.add(META.values[dim].indexOf(v));
   return [...set].filter((i) => i >= 0).sort((a, b) => a - b).map((i) => META.values[dim][i]);
 }
+function matchingSeries() {
+  const sel = DIMS.map((d, i) => [i, new Set(S.f[d].map((v) => META.values[d].indexOf(v)))]).filter(([, s]) => s.size);
+  let n = 0;
+  for (const r of META.rows) if (sel.every(([i, s]) => s.has(r[i]))) n++;
+  return n;
+}
 function filterSummary(dim) {
   const v = S.f[dim];
   if (!v.length) return "All";
@@ -388,6 +394,12 @@ async function render() {
   document.title = `${v.title} · Celeris Control Tower`;
   disposeCharts();
   const C = $("#content");
+  if (S.view !== "drivers" && DIMS.some((d) => S.f[d].length) && matchingSeries() === 0) {
+    const sel = DIMS.filter((d) => S.f[d].length).map((d) => `${DIM_LABEL[d]}: <b>${esc(S.f[d].join(", "))}</b>`).join(" · ");
+    C.innerHTML = `<div class="card"><div class="empty">No SKU × region series matches this combination of filters (${sel}).<br><br><button class="reset-btn" id="emptyReset">Reset all filters</button></div></div>`;
+    $("#emptyReset").addEventListener("click", () => { DIMS.forEach((d) => (S.f[d] = [])); go(); });
+    return;
+  }
   C.innerHTML = `<div class="kpis">${'<div class="skel" style="height:86px"></div>'.repeat(5)}</div><div class="skel" style="height:360px"></div>`;
   try {
     await RENDER[S.view](C, () => my === token);
@@ -574,6 +586,7 @@ async function vExplorer(C, alive) {
   });
   const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const hv = d.heat.filter((r) => isNum(r[2])).map((r) => r[2]);
+  if (!hv.length) hv.push(0);
   mount("e-heat", {
     legend: false,
     tooltip: { trigger: "item", formatter: (p) => ttHead(`${mon[p.value[0]]} ${d.years[p.value[1]]}`) + ttRow(null, "Demand", fmtN(p.value[2])) },
