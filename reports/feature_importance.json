@@ -2,123 +2,123 @@
   "gbm_tweedie": [
     {
       "feature": "same_month_order_prob",
-      "gain": 210704978.117335
+      "gain": 221807868.7936274
     },
     {
       "feature": "seasonal_ratio",
-      "gain": 54494033.13298035
+      "gain": 64459281.21499634
     },
     {
       "feature": "same_month_mean",
-      "gain": 48376714.388801575
+      "gain": 32461885.30687459
     },
     {
       "feature": "nz_count_12",
-      "gain": 17139716.414863586
-    },
-    {
-      "feature": "adi_24",
-      "gain": 8670265.90501658
+      "gain": 9461254.859392801
     },
     {
       "feature": "history_len",
-      "gain": 7843218.043225606
+      "gain": 7446311.721611023
     },
     {
       "feature": "yoy_12",
-      "gain": 5437762.546544393
-    },
-    {
-      "feature": "Product_Family",
-      "gain": 3862474.028526306
-    },
-    {
-      "feature": "Customer_Name",
-      "gain": 3678545.605219523
-    },
-    {
-      "feature": "Powertrain_Application",
-      "gain": 3117146.1348953247
+      "gain": 5430510.825798035
     },
     {
       "feature": "same_month_1",
-      "gain": 2180284.51016744
+      "gain": 5410566.863482158
+    },
+    {
+      "feature": "median_12",
+      "gain": 5061938.482899983
+    },
+    {
+      "feature": "Product_Family",
+      "gain": 3832498.605394999
+    },
+    {
+      "feature": "Customer_Name",
+      "gain": 3529082.534022013
+    },
+    {
+      "feature": "adi_24",
+      "gain": 3389125.7455418906
     },
     {
       "feature": "Region",
-      "gain": 2070980.0526835124
+      "gain": 1959868.6411819458
     },
     {
       "feature": "Sales_Channel",
-      "gain": 1961182.0640385945
-    },
-    {
-      "feature": "holiday_share",
-      "gain": 1537878.210629781
-    },
-    {
-      "feature": "zero_share_24",
-      "gain": 1471605.1877492268
-    },
-    {
-      "feature": "months_since_launch",
-      "gain": 1404200.0143610637
+      "gain": 1933559.359512329
     },
     {
       "feature": "cycle_est",
-      "gain": 1397244.216954549
+      "gain": 1668228.1369806926
     },
     {
-      "feature": "Size_Class",
-      "gain": 1386831.5567194622
+      "feature": "holiday_share",
+      "gain": 1548789.1127370198
     },
     {
-      "feature": "nz_mean_12",
-      "gain": 1370514.2302118938
+      "feature": "ev_d3_EV",
+      "gain": 1516241.6720555623
+    },
+    {
+      "feature": "zero_share_24",
+      "gain": 1512762.8037948608
     },
     {
       "feature": "Industrial_Util_Rate_Pct_l6",
-      "gain": 1238978.2933578491
+      "gain": 1398145.7821909587
+    },
+    {
+      "feature": "Size_Class",
+      "gain": 1267427.6816762288
     },
     {
       "feature": "ISM_Manufacturing_PMI_d5",
-      "gain": 1220956.6447296143
+      "gain": 1208534.5516459148
     },
     {
-      "feature": "mean_12",
-      "gain": 1200480.8343404133
+      "feature": "ev_d0_EV",
+      "gain": 1201614.981318156
     },
     {
-      "feature": "Auto_Production_YoY_Pct_l3",
-      "gain": 1096345.1319376628
+      "feature": "months_since_launch",
+      "gain": 1195025.5776875813
     },
     {
-      "feature": "mean_24",
-      "gain": 1015871.7186889648
+      "feature": "nz_mean_12",
+      "gain": 1100421.6595230103
     },
     {
       "feature": "ISM_Manufacturing_PMI_l1",
-      "gain": 991991.4726486206
+      "gain": 1088762.7907358806
+    },
+    {
+      "feature": "Auto_Production_YoY_Pct_l3",
+      "gain": 962979.4679718018
     },
     {
       "feature": "trend_6",
-      "gain": 990432.5317166647
+      "gain": 902120.4771436056
     },
     {
-      "feature": "max_12",
-      "gain": 915444.3606084188
-    },
-    {
-      "feature": "same_month_2",
-      "gain": 902986.3533910116
+      "feature": "mean_36",
+      "gain": 863391.9030049642
     },
     {
       "feature": "cv2_24",
-      "gain": 868459.6362126669
+      "gain": 845662.4220428467
     },
     {
-      "feature": "month",
-      "gain": 799265.7853037516
+      "feature": "max_12",
+      "gain": 764202.4081726074
+    },
+    {
+      "feature": "same_month_2",
+      "gain": 751890.9927927653
     }
   ]
 }

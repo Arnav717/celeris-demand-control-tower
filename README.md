@@ -86,16 +86,24 @@ backtest spread. The JSON API behind every view is documented at `/api/docs`.
 | LightGBM Tweedie, history + calendar + events only | 0.2745 | −4.0 % |
 | + macro change-from-origin features | 0.2710 | −4.7 % |
 | + 3-seed bagging | 0.2700 | −5.2 % |
-| **+ one-off uplift (final)** | **0.2701** | **−4.2 %** |
+| + one-off uplift | 0.2701 | −4.2 % |
+| **+ EV-shift features, 36 / 48-month level (final)** | **0.2671** | **−4.2 %** |
 
-* Summed bottom-up: family-level WAPE 6.8 %, region-level 6.2 % (seasonal naive 9.8 % /
+* Summed bottom-up: family-level WAPE 6.7 %, region-level 6.0 % (seasonal naive 9.8 % /
   8.3 %; 8.2 % / 7.6 % before the macro change features).
-* SKU-level P10–P90 coverage 80.4 % over all 4 origins (80.5 / 79.8 / 80.0 / 81.1 %;
+* SKU-level P10–P90 coverage 80.8 % over all 4 origins (80.4 / 80.2 / 81.5 / 80.9 %;
   target 80 %).
-* By horizon: WAPE 0.252 at month 1 → 0.271 at month 19. By region: North America 0.242
-  → Middle East & Africa 0.345 (shortest history, entered 2022). By family: Powertrain
-  0.262 → Electrical Assemblies 0.288.
-* Bias by origin: −6.0 %, −7.4 %, −3.0 %, −0.2 %, shrinking towards zero for recent
+* By horizon: WAPE 0.251 at month 1 → 0.265 at month 19 (peak 0.279). By region: Europe
+  and North America 0.239 → Middle East & Africa 0.341 (shortest history, entered 2022).
+  By family: Powertrain 0.260 → Electrical Assemblies 0.277.
+* EV shift: EV-only SKUs were the worst segment (WAPE 0.324, bias −20 % at the 2023-10
+  origin and +24 % at 2025-03): the model extrapolated EV growth momentum, while EV
+  demand per series follows the EV adoption index, which flattened at ~90 in 2025.
+  Giving EV and ICE series their own change in the (known) index between origin and
+  target month cut EV WAPE to 0.285 and SKU-level WAPE by 0.003, better or equal at
+  every origin (checked with two seeds before the full run). The 36 / 48-month means and
+  12-month median are neutral at SKU level and lower family-level WAPE.
+* Bias by origin: −5.3 %, −7.2 %, −3.8 %, −0.5 %, shrinking towards zero for recent
   origins. Roughly 1 point is the capped one-off orders, which the uplift puts back;
   no further blanket correction is applied (a leave-one-origin-out correction made the
   two most recent origins worse).
@@ -108,7 +116,11 @@ backtest spread. The JSON API behind every view is documented at `/api/docs`.
   aggregate family / region / customer growth features, seasonally clean momentum,
   pooled family × region seasonal index with deseasonalised level, recency weighting,
   wider macro lag sets, 127 / 31 leaves, lower learning rate, Tweedie power 1.1 / 1.5,
-  blends with the seasonal-index baseline or the L1 model.
+  blends with the seasonal-index baseline or the L1 model, EV index *level* (instead of
+  change) per powertrain, a ridge regression of family totals on macro changes used
+  top-down (family WAPE 13.4 % vs 7.1 % bottom-up), customer effects for the 10 series
+  that switch customer at the forecast start (no customer-level volume effect exists in
+  the history; post-switch level ratios of 0.5–2.2× are unpredictable).
 
 ## Repository layout
 
@@ -175,6 +187,10 @@ the EV shift.
   target month and the value that drove the origin (log change for index-type
   indicators). This lets the model carry the macro outlook into the 19-month horizon
   instead of extrapolating recent history.
+* EV-shift features: the log change in the EV adoption index between origin and target
+  month (lags 0, 3, 6), given only to EV-only series and, as a separate feature, only to
+  ICE-only series (universal parts get 0). Plus 36 / 48-month means and a 12-month
+  median as longer, more robust level anchors.
 * Point forecast = Tweedie GBM, average of 3 seeds, × one-off uplift: one-off orders are
   capped in the training target but keep happening, so the forecast is scaled by
   demand ÷ capped target over the last 24 months before the origin (1.010–1.013).

@@ -24,6 +24,7 @@ CATS = ["Product_Family", "Region", "Sales_Channel", "Customer_Name", "Powertrai
 INDEX_INDICATORS = {"Raw_Material_Cost_Index", "New_Vehicle_Orders_Index", "Fuel_Price_Index",
                     "EV_Adoption_Index"}
 MACRO_CHG_LAGS = (0, 2, 3, 5)  # leading-indicator lags found in the drivers analysis
+EV_LAGS = (0, 3, 6)
 
 
 # ----------------------------------------------------------------------------- inputs
@@ -158,8 +159,10 @@ def _origin_features(P: Panel, t: int) -> dict[str, np.ndarray]:
     f = {}
     for k in (0, 1, 2, 3, 5, 11):
         f[f"lag_{k}"] = Y[:, t - k] if t - k >= 0 else np.full(P.S, np.nan)
-    for w in (3, 6, 12, 24):
+    for w in (3, 6, 12, 24, 36, 48):
         f[f"mean_{w}"] = _nanmean(Y[:, max(0, t - w + 1):])
+    # robust level: one high or low month moves the median less than the mean
+    f["median_12"] = np.nanmedian(Y[:, max(0, t - 11):], axis=1)
     last12 = Y[:, max(0, t - 11):]
     with np.errstate(all="ignore"):
         f["std_12"] = np.nanstd(last12, axis=1)
@@ -222,6 +225,16 @@ def _target_features(P: Panel, X: Exog, t: int, h: int, of: dict) -> dict[str, n
         # the origin, at each leading lag (macro file covers the forecast window)
         for lag in MACRO_CHG_LAGS:
             f[f"{name}_d{lag}"] = np.full(S, X.macro_t[m - lag, j] - X.macro_t[t - lag, j])
+    # EV shift: EV-only parts follow the EV adoption index up, ICE-only parts move the
+    # other way, universal parts do not care. The index is known for the forecast window,
+    # so give the change from origin to target separately to EV and ICE series (a global
+    # macro feature alone made the trees extrapolate EV growth momentum instead).
+    ev = X.macro_t[:, MACRO.index("EV_Adoption_Index")]
+    pt = P.meta["Powertrain_Application"].to_numpy()
+    for lag in EV_LAGS:
+        d = ev[m - lag] - ev[t - lag]
+        f[f"ev_d{lag}_EV"] = np.where(pt == "EV", d, 0.0)
+        f[f"ev_d{lag}_ICE"] = np.where(pt == "ICE", d, 0.0)
     mo, yr = int(MONTHS[m][5:]), int(MONTHS[m][:4])
     f["price_rise_next_jan"] = np.full(S, X.rise.get(yr + 1, 0.0) if mo in (11, 12) else 0.0)
     f["price_rise_this_jan"] = np.full(S, X.rise.get(yr, 0.0) if mo in (1, 2) else 0.0)
